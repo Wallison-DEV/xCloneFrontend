@@ -51,7 +51,7 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
         const isLocalMedia = props.media.startsWith('/media/post_media');
 
         if (isLocalMedia) {
-            const mediaUrl = props.media.replace('/media', 'http://localhost:8000/media');
+            const mediaUrl = props.media.replace('/media', 'https://x-clone-backend-cyan.vercel.app/media');
 
             const mediaType = mediaUrl.split('.').pop()?.toLowerCase();
 
@@ -127,10 +127,10 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
         try {
             await deleteRetweetPurchase({ id: props.id, accessToken });
             if (deleteIsSuccess) {
-                alert('Tweet deletado com sucesso!');
+                alert('Retweet deletado com sucesso!');
             }
         } catch (error) {
-            console.error('Failed to like post:', error);
+            console.error('Failed to delete retweet:', error);
         }
     }
 

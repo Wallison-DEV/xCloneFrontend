@@ -29,7 +29,7 @@ type AddLikeRequest = {
 const api = createApi({
     reducerPath: '',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:8000/'
+        baseUrl: 'https://x-clone-backend-cyan.vercel.app/'
     }),
     endpoints: (builder) => ({
         DoLogin: builder.mutation<LoginResponse, LoginRequestBody>({
