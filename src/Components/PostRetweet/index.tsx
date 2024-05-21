@@ -1,4 +1,3 @@
-import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
 import * as S from '../Postdetails/styles'
@@ -6,14 +5,14 @@ import { StyledHeader } from "../PostList/styles"
 import { PostForm, PreviewImage } from '../PostForm/styles'
 import { LoginDiv } from "../Login/styles"
 
-import { useDoRepostMutation } from "../../Services/api";
-import { RootReducer } from "../../Store";
+import { useDoRepostMutation, useGetMyuserQuery } from "../../Services/api";
 
-import userImg from '../../assets/img/user.png';
+import userIcon from '../../assets/img/profile_avatar.png';
 import pictureIcon from '../../assets/icons/pictureIcon.png'
 
 import Button from "../Button";
 import MinimizedTweet from "../MinimizedTweet";
+import { convertUrl } from "../../Utils";
 
 interface PostRetweetProps {
     post: PostProps;
@@ -21,7 +20,8 @@ interface PostRetweetProps {
 }
 
 const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
-    const token = useSelector((state: RootReducer) => state.token)
+    const accessToken = localStorage.getItem('accessToken') || ''
+    const { data: myProfile } = useGetMyuserQuery(accessToken)
     const [doRepost, { isError, error, isSuccess }] = useDoRepostMutation();
     const [textRepostValue, setTextRepostValue] = useState('')
     const [sourceRepostValue, setSourceRepostValue] = useState<File | null>(null)
@@ -45,9 +45,10 @@ const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
             const content = String(textRepostValue);
             const media = sourceRepostValue || null;
             const tweet = post.id;
+            const accessToken = localStorage.getItem("accessToken") || '';
 
             const response = await doRepost({
-                content, tweet, media, accessToken: token.accessToken || '',
+                content, tweet, media, accessToken,
             });
             console.log('response: ', response)
 
@@ -75,7 +76,7 @@ const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
                     </StyledHeader>
                 }
                 <PostForm onSubmit={handleSubmit}>
-                    <img src={userImg} alt="" />
+                    <img src={myProfile?.profile_image ? convertUrl(myProfile?.profile_image) : userIcon} alt="" />
                     <div>
                         <textarea placeholder='O que está acontecendo?' value={textRepostValue} onChange={(e) => setTextRepostValue(e.target.value)} />
                         {sourceRepostValue && (

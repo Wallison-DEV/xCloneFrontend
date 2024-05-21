@@ -1,28 +1,27 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-import { clearTokens } from "../../Store/reducers/token";
-import { RootReducer } from "../../Store";
+import { useDispatch } from "react-redux";
 
 import * as S from './styles'
 import { Modal } from "../../styles";
 
-import userIcon from "../../assets/img/user.png"
+import userIcon from "../../assets/img/profile_avatar.png"
 import { IoHomeOutline, IoPersonOutline, IoSearch } from "react-icons/io5";
 import { FaPenFancy } from "react-icons/fa6";
 
 import { useGetMyuserQuery } from "../../Services/api";
 import { clearFollowed, updateMyUser } from "../../Store/reducers/profile";
-import PostForm from "../PostForm";
+import { falseValidate } from "../../Store/reducers/entry";
 
+import PostForm from "../PostForm";
 import Button from '../Button'
+import { convertUrl } from "../../Utils";
 
 const NavAside = () => {
-    const token = useSelector((state: RootReducer) => state.token)
+    const accessToken = localStorage.getItem('accessToken') || ''
     const dispatch = useDispatch()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isPostModalOpen, setIsPostModalOpen] = useState(false)
-    const { data: myProfile } = useGetMyuserQuery(token.accessToken || '')
+    const { data: myProfile } = useGetMyuserQuery(accessToken)
 
     useEffect(() => {
         dispatch(updateMyUser(myProfile))
@@ -30,9 +29,9 @@ const NavAside = () => {
 
     const handleLogout = async () => {
         try {
-            const refreshToken = token.refreshToken;
+            const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-                const responseLogout = await fetch('http://wallison.pythonanywhere.com/api/logout/', {
+                const responseLogout = await fetch('http://localhost:8000/api/logout/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -43,7 +42,10 @@ const NavAside = () => {
                 });
                 console.log(responseLogout);
             }
-            dispatch(clearTokens())
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("accessTokenExp");
+            dispatch(falseValidate())
             dispatch(clearFollowed())
         } catch (error: any) {
             console.error('Error logging out:', error.message);
@@ -87,15 +89,15 @@ const NavAside = () => {
                         <S.ProfileDiv>
                             {isMenuOpen && myProfile !== null && (
                                 <S.ExitButton variant="light" onClick={handleLogout}>
-                                    Sair de @{myProfile?.username}
+                                    Sair de {myProfile?.arroba}
                                 </S.ExitButton>
                             )}
                             <S.MyProfile onClick={() => setIsMenuOpen(!isMenuOpen)}>
                                 <div>
-                                    <img src={userIcon} alt="" />
+                                    <img src={myProfile?.profile_image ? convertUrl(myProfile.profile_image) : userIcon} alt="" />
                                     <div className="userInfos">
                                         <p>{myProfile?.username || "Nome de Usuário"}</p>
-                                        <span>@{myProfile?.username || "Nome de Usuário"}</span>
+                                        <span>{myProfile?.arroba || "Nome de Usuário"}</span>
                                     </div>
                                 </div>
                                 <span>...</span>

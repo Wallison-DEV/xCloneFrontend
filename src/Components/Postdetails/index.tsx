@@ -1,4 +1,3 @@
-import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"
 
@@ -8,11 +7,9 @@ import { PreviewImage, PostForm } from "../PostForm/styles";
 import { PostSource } from "../Tweet/styles";
 
 import { useDoCommentMutation } from "../../Services/api";
-import { RootReducer } from "../../Store";
 import { timePost } from '../../Utils'
 
-
-import userImg from '../../assets/img/user.png';
+import userIcon from '../../assets/img/profile_avatar.png';
 import pictureIcon from '../../assets/icons/pictureIcon.png'
 
 import Button from "../Button";
@@ -26,7 +23,6 @@ interface PostDetailsProps {
 }
 
 const PostDetails: React.FC<PostDetailsProps> = ({ post, onClose }) => {
-    const token = useSelector((state: RootReducer) => state.token)
     const navigate = useNavigate()
     const [doComment, { isError, error, isSuccess }] = useDoCommentMutation();
     const [textCommentValue, setTextCommentValue] = useState('')
@@ -81,9 +77,9 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, onClose }) => {
             const content_type = post.hasOwnProperty('tweet_id') ? 7 : 6;
             const object_id = String(post.id);
             const media = sourceCommentValue || null;
-
+            const accessToken = localStorage.getItem("accessToken") || '';
             await doComment({
-                content, content_type, object_id, media, accessToken: token.accessToken || '',
+                content, content_type, object_id, media, accessToken,
             });
             setSourceCommentValue(null);
             setTextCommentValue('');
@@ -113,7 +109,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, onClose }) => {
                 {('tweet_id' in post) ? (<Retweet props={post} modalDisabled={true} />) : (<Tweet props={post} modalDisabled={true} />)}
                 <S.CommentsSection>
                     <PostForm onSubmit={handleSubmit}>
-                        <img src={userImg} alt="" />
+                        <img src={userIcon} alt="" />
                         <div>
                             <textarea placeholder='O que está acontecendo?' value={textCommentValue} onChange={(e) => setTextCommentValue(e.target.value)} />
                             {sourceCommentValue && (
@@ -142,7 +138,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, onClose }) => {
                     </PostForm>
                     {post.comments.map(comment => (
                         <div key={comment.id}>
-                            <img src={userImg} alt="Imagem de usuário" />
+                            <img src={userIcon} alt="Imagem de usuário" />
                             <div>
                                 <S.CommentHeader onClick={() => handleUserClick(comment.user.id)}>
                                     {comment.user.username}<span>@{comment.user.username} · {timePost(comment.created_at)}</span>

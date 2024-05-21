@@ -3,14 +3,14 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { RootReducer } from '../../Store';
-import { timePost } from '../../Utils'
+import { convertUrl, timePost } from '../../Utils'
 
 import { useAddLikeTweetMutation } from '../../Services/api';
 
 import * as S from './styles';
 import { Modal } from '../../styles';
 
-import userImg from '../../assets/img/user.png';
+import userIcon from '../../assets/img/profile_avatar.png';
 import commentIcon from '../../assets/icons/comment.png';
 import retweetIcon from '../../assets/icons/repost.png';
 import likeIcon from '../../assets/icons/like.png';
@@ -21,6 +21,7 @@ import PostDetails from '../Postdetails';
 import PostRetweet from '../PostRetweet';
 import RetweetList from '../RetweetList';
 import Button from '../Button';
+import PostEditForm from '../PostEditForm';
 
 type Props = {
     props: PostProps;
@@ -28,8 +29,8 @@ type Props = {
 }
 
 const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
+    const accessToken = localStorage.getItem('accessToken') || ''
     const navigate = useNavigate();
-    const token = useSelector((state: RootReducer) => state.token);
     const myUserProfile = useSelector((state: RootReducer) => state.profile.myUser);
     const [addLike, { isLoading: isAddingLike }] = useAddLikeTweetMutation();
     const [liked, setLiked] = useState(
@@ -42,6 +43,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
     const [modalRetweetList, setModalRetweetListIsOpen] = useState(false);
     const [moreOptionsRetweet, setMoreOptionsRetweet] = useState(false);
     const [modalPostRetweet, setModalPostRetweetIsOpen] = useState(false);
+    const [modalEditTweet, setModalEditTweetIsOpen] = useState(false);
 
     const renderMedia = () => {
         if (!props.media) {
@@ -51,7 +53,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
         const isLocalMedia = props.media.startsWith('/media/post_media');
 
         if (isLocalMedia) {
-            const mediaUrl = props.media.replace('/media', 'http://wallison.pythonanywhere.com/media');
+            const mediaUrl = props.media.replace('/media', 'http://localhost:8000/media');
 
             const mediaType = mediaUrl.split('.').pop()?.toLowerCase();
 
@@ -93,7 +95,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
 
     const handleLikeClick = async (postId: number) => {
         try {
-            await addLike({ postId, accessToken: token?.accessToken || '' });
+            await addLike({ postId, accessToken });
             if (liked === true) {
                 setLiked(false)
                 setLikeCount(likeCount - 1)
@@ -129,11 +131,15 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
         setModalRetweetListIsOpen(!modalRetweetList);
     }
 
+    const handleOpenTweetEditModal = () => {
+        setModalEditTweetIsOpen(!modalEditTweet);
+    }
+
     return (
-        <S.PostContainer key={props.id}>
+        <S.PostDiv key={props.id}>
             <div onClick={() => handleUserClick(props.user.id)}>
                 <S.UserInfo>
-                    <img src={userImg} alt="" />
+                    <img src={props.user.profile_image ? convertUrl(props.user.profile_image) : userIcon} alt="" />
                     <div>
                         <h2>{props.user.username}</h2>
                         <span>@{props.user.username} · {timePost(props.created_at)}</span>
@@ -197,7 +203,13 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
                     <div className='overlay' onClick={() => handleOpenPostRetweetModal()} />
                 </Modal>
             }
-        </S.PostContainer>
+            {modalEditTweet &&
+                <Modal>
+                    <PostEditForm onClose={handleOpenTweetEditModal} post={props} />
+                    <div className='overlay' onClick={() => handleOpenTweetEditModal()} />
+                </Modal>
+            }
+        </S.PostDiv>
     );
 };
 

@@ -29,7 +29,7 @@ type AddLikeRequest = {
 const api = createApi({
     reducerPath: '',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://wallison.pythonanywhere.com/'
+        baseUrl: 'http://localhost:8000/'
     }),
     endpoints: (builder) => ({
         DoLogin: builder.mutation<LoginResponse, LoginRequestBody>({
@@ -189,8 +189,40 @@ const api = createApi({
         getPostById: builder.query<(PostProps), number>({
             query: (id) => `posts/${id}/`, 
         }),
+        updateProfile : builder.mutation({
+            query: ({ body, accessToken }) => ({
+                url: `update-profile/`,
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body
+            }),
+        }),
+        updateTweet : builder.mutation({
+            query: ({ body, accessToken }) => ({
+                url: `post/update-tweet/`,
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body
+            }),
+        }),
+        updateRetweet : builder.mutation({
+            query: ({ body, accessToken }) => ({
+                url: `retweet/update-retweet/`,
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body
+            }),
+        }),
     })
-});
+})
 
 export const { 
     useDoLoginMutation, 
@@ -210,6 +242,9 @@ export const {
     useAddLikeRetweetMutation,
     useGetPostByIdQuery,
     useDoRepostMutation,
+    useUpdateProfileMutation,
+    useUpdateTweetMutation,
+    useUpdateRetweetMutation,
 } = api;
 
 export default api;

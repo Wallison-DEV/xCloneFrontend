@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { useDoPostMutation } from '../../Services/api'
-import { RootReducer } from '../../Store';
+import { useDoPostMutation, useGetMyuserQuery } from '../../Services/api'
+import { convertUrl } from "../../Utils";
 
 import * as S from './styles'
 
 import Button from "../Button";
 
-import userImg from '../../assets/img/user.png'
+import userIcon from '../../assets/img/profile_avatar.png'
 import pictureIcon from '../../assets/icons/pictureIcon.png'
 
 const PostForm = ({ isNotModal }: { isNotModal?: boolean }) => {
-    const token = useSelector((state: RootReducer) => state.token)
+    const accessToken = localStorage.getItem('accessToken') || ''
+    const { data: myProfile } = useGetMyuserQuery(accessToken)
     const [textPostValue, setTextPostValue] = useState('')
     const [sourcePostValue, setSourcePostValue] = useState<File | null>(null)
     const [postMedia] = useDoPostMutation()
@@ -26,7 +26,7 @@ const PostForm = ({ isNotModal }: { isNotModal?: boolean }) => {
             }
             await postMedia({
                 body: formData,
-                accessToken: token?.accessToken || ''
+                accessToken
             });
             setSourcePostValue(null);
             setTextPostValue('');
@@ -48,7 +48,7 @@ const PostForm = ({ isNotModal }: { isNotModal?: boolean }) => {
     return (
         <S.PostDiv style={{ zIndex: !isNotModal ? '100' : '' }}>
             <S.PostForm onSubmit={handleSubmit}>
-                <img src={userImg} alt="" />
+                <img src={myProfile?.profile_image ? convertUrl(myProfile?.profile_image) : userIcon} alt="" />
                 <div>
                     <textarea placeholder='O que está acontecendo?' value={textPostValue} onChange={(e) => setTextPostValue(e.target.value)} />
                     {
