@@ -31,7 +31,7 @@ const NavAside = () => {
         try {
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-                const responseLogout = await fetch('http://localhost:8000/api/logout/', {
+                const responseLogout = await fetch('https://x-clone-backend-cyan.vercel.app/api/logout/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { RootReducer } from '../../Store';
 import { convertUrl, timePost } from '../../Utils'
 
-import { useAddLikeRetweetMutation, useGetPostByIdQuery } from '../../Services/api';
+import { useAddLikeRetweetMutation, useDeleteRetweetByIdMutation, useGetPostByIdQuery } from '../../Services/api';
 
 import { Modal } from '../../styles';
 import * as S from '../Tweet/styles';
@@ -28,10 +28,12 @@ type Props = {
 };
 
 const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
+    const accessToken = localStorage.getItem("accessToken") || '';
     const navigate = useNavigate();
     const myUserProfile = useSelector((state: RootReducer) => state.profile.myUser);
-    const [addLike, { isLoading: isAddingLike, isSuccess }] = useAddLikeRetweetMutation();
+    const [addLike, { isLoading: isAddingLike, isSuccess: addLikeIsSuccess }] = useAddLikeRetweetMutation();
     const { data } = useGetPostByIdQuery(props.tweet_id)
+    const [deleteRetweetPurchase, { isSuccess: deleteIsSuccess }] = useDeleteRetweetByIdMutation();
     const [liked, setLiked] = useState(
         props.likes.liked_by ? props.likes.liked_by.some((user: any) => user.id === myUserProfile?.id) : false
     );
@@ -49,7 +51,7 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
         const isLocalMedia = props.media.startsWith('/media/post_media');
 
         if (isLocalMedia) {
-            const mediaUrl = props.media.replace('/media', 'http://localhost:8000/media');
+            const mediaUrl = props.media.replace('/media', 'https://x-clone-backend-cyan.vercel.app/media');
 
             const mediaType = mediaUrl.split('.').pop()?.toLowerCase();
 
@@ -121,8 +123,19 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
         setModalEditRetweetIsOpen(!modalEditRetweet);
     }
 
+    const deleteRetweet = async () => {
+        try {
+            await deleteRetweetPurchase({ id: props.id, accessToken });
+            if (deleteIsSuccess) {
+                alert('Retweet deletado com sucesso!');
+            }
+        } catch (error) {
+            console.error('Failed to delete retweet:', error);
+        }
+    }
+
     useEffect(() => {
-        if (isSuccess) {
+        if (addLikeIsSuccess) {
             if (liked === true) {
                 setLiked(false)
                 setLikeCount(likeCount - 1)
@@ -131,7 +144,7 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
                 setLikeCount(likeCount + 1)
             }
         }
-    }, [isSuccess])
+    }, [addLikeIsSuccess])
 
     return (
         <S.PostDiv key={props.id}>
@@ -148,7 +161,7 @@ const Retweet: React.FC<Props> = ({ props, modalDisabled }) => {
                         {modalMoreInfos && (
                             <div className='options-div'>
                                 <Button onClick={() => handleOpenRetweetEditModal()} variant='light'>Editar</Button>
-                                <Button onClick={() => handleOpenRetweetEditModal()} variant='light'>Excluir</Button>
+                                <Button onClick={() => deleteRetweet()} variant='light'>Excluir</Button>
                             </div>
                         )}
                         <button className='more-options-btn'>

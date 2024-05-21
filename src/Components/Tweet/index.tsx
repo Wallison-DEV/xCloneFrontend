@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { RootReducer } from '../../Store';
 import { convertUrl, timePost } from '../../Utils'
 
-import { useAddLikeTweetMutation } from '../../Services/api';
+import { useAddLikeTweetMutation, useDeleteTweetByIdMutation } from '../../Services/api';
 
 import * as S from './styles';
 import { Modal } from '../../styles';
@@ -33,6 +33,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
     const navigate = useNavigate();
     const myUserProfile = useSelector((state: RootReducer) => state.profile.myUser);
     const [addLike, { isLoading: isAddingLike }] = useAddLikeTweetMutation();
+    const [deleteTweetPurchase, { isSuccess }] = useDeleteTweetByIdMutation();
     const [liked, setLiked] = useState(
         props.likes.liked_by ? props.likes.liked_by.some((user: any) => user.id === myUserProfile?.id) : false
     );
@@ -54,7 +55,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
         const isLocalMedia = props.media.startsWith('/media/post_media');
 
         if (isLocalMedia) {
-            const mediaUrl = props.media.replace('/media', 'http://localhost:8000/media');
+            const mediaUrl = props.media.replace('/media', 'https://x-clone-backend-cyan.vercel.app/media');
 
             const mediaType = mediaUrl.split('.').pop()?.toLowerCase();
 
@@ -140,6 +141,17 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
         setModalMoreInfosIsOpen(!modalMoreInfos);
     }
 
+    const deleteTweet = async () => {
+        try {
+            await deleteTweetPurchase({ id: props.id, accessToken });
+            if (isSuccess) {
+                alert('Tweet deletado com sucesso!');
+            }
+        } catch (error) {
+            console.error('Failed to delete tweet:', error);
+        }
+    }
+
     return (
         <S.PostDiv key={props.id}>
             <header>
@@ -157,7 +169,7 @@ const Tweet: React.FC<Props> = ({ props, modalDisabled }) => {
                         {modalMoreInfos && (
                             <div className='options-div'>
                                 <Button onClick={() => handleOpenTweetEditModal()} variant='light'>Editar</Button>
-                                <Button onClick={() => handleOpenRetweetListModal()} variant='light'>Excluir</Button>
+                                <Button onClick={() => deleteTweet()} variant='light'>Excluir</Button>
                             </div>
                         )}
                         <button className='more-options-btn'>
