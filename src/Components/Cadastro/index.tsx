@@ -19,7 +19,7 @@ const Cadastro = () => {
         e.preventDefault();
         const formData = { username, email, arroba, password };
         try {
-            const response = await fetch('https://x-clone-backend-cyan.vercel.app/users/', {
+            const response = await fetch('https://wallison.pythonanywhere.com/users/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
