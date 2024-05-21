@@ -3,30 +3,25 @@ import { useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import * as S from './styles'
 
-import userIcon from "../../assets/img/user.png"
+import userIcon from "../../assets/img/profile_avatar.png"
 import Button from '../Button'
 
 import { RootReducer } from "../../Store"
 import { updateFollowedProfiles } from '../../Store/reducers/profile';
-import { followProfile, unfollowProfile } from "../../Utils"
+import { convertUrl, followProfile, unfollowProfile } from "../../Utils"
 import { useFollowMutation, useGetMyuserQuery, useUnfollowMutation } from "../../Services/api"
 
-interface UsersProfile {
-    id: number;
-    username: string;
-}
-
 interface UsersListProps {
-    users?: UsersProfile[];
+    users?: User[];
     followButton: boolean;
 }
 
 const UsersList = ({ users, followButton }: UsersListProps) => {
-    const token = useSelector((state: RootReducer) => state.token)
+    const accessToken = localStorage.getItem("accessToken") || ''
     const followedProfilesIds = useSelector((state: RootReducer) => state.profile.followedProfiles)
     const [followUser] = useFollowMutation()
     const [unfollowUser] = useUnfollowMutation()
-    const { data: myProfile } = useGetMyuserQuery(token?.accessToken || '')
+    const { data: myProfile } = useGetMyuserQuery(accessToken)
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -48,18 +43,18 @@ const UsersList = ({ users, followButton }: UsersListProps) => {
     }
     const handleFollowProfile = (profileId: number) => {
         if (isProfileFollowed(profileId)) {
-            unfollowProfile(profileId, token?.accessToken || '', dispatch, unfollowUser);
+            unfollowProfile(profileId, accessToken, dispatch, unfollowUser);
         } else {
-            followProfile(profileId, token?.accessToken || '', dispatch, followUser);
+            followProfile(profileId, accessToken, dispatch, followUser);
         }
     }
 
     return (
         <>
-            {users && users.map((profile: UsersProfile) => (
+            {users && users.map((profile: User) => (
                 <S.Profile onClick={() => handleUserClick(profile.id)} key={profile.id}>
                     <div>
-                        <img src={userIcon} alt="" />
+                        <img src={profile.profile_image ? convertUrl(profile.profile_image) : userIcon} alt="" />
                         <div>
                             <p>{profile.username}</p>
                             <span>@{profile.username}</span>

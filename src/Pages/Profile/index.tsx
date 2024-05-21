@@ -1,35 +1,41 @@
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { RootReducer } from '../../Store';
+import { openModalEditProfile, openModalFollow } from '../../Store/reducers/profile';
 import { useGetUserByIdQuery, useGetPostUserIdQuery, useFollowMutation, useUnfollowMutation, useGetMyuserQuery } from '../../Services/api';
+import { unfollowProfile, followProfile, convertUrl } from '../../Utils';
+
 import * as S from './styles';
+import { PostContainer } from '../../Components/PostList/styles';
+
 import profileImg from '../../assets/img/profile_avatar.png';
+
 import Button from '../../Components/Button';
-import { unfollowProfile, followProfile } from '../../Utils';
 import FollowList from '../../Components/FollowList';
-import { useState } from 'react';
-import { openModalFollow } from '../../Store/reducers/profile';
 import Retweet from '../../Components/Retweet';
 import Tweet from '../../Components/Tweet';
+import ProfileForm from '../../Components/ProfileEditForm';
 
 const Profile = () => {
     const { id } = useParams();
-    const token = useSelector((state: RootReducer) => state.token);
-    const isModalOpen = useSelector((state: RootReducer) => state.profile.modalOpen);
+    const accessToken = localStorage.getItem("accessToken") || '';
+    const isModalFollowOpen = useSelector((state: RootReducer) => state.profile.modalFollowOpen);
+    const isModalEditOpen = useSelector((state: RootReducer) => state.profile.modalEditProfileOpen);
     const followedProfilesIds = useSelector((state: RootReducer) => state.profile.followedProfiles);
     const dispatch = useDispatch();
 
     const { data: user, isLoading: UserLoading, error: UserError } = useGetUserByIdQuery(Number(id));
     const followersUser = (user && Array.isArray(user.followers))
-        ? user.followers.map(u => ({ id: Number(u.id), username: u.username }))
+        ? user.followers.map(u => ({ id: Number(u.id), username: u.username, profile_image: u.profile_image }))
         : [];
 
     const followingsUser = (user && Array.isArray(user.following))
-        ? user.following.map(u => ({ id: Number(u.id), username: u.username }))
+        ? user.following.map(u => ({ id: Number(u.id), username: u.username, profile_image: u.profile_image }))
         : [];
-    const { data: userPosts, isLoading: PostsLoading, error: PostsError } = useGetPostUserIdQuery({ id: Number(id), accessToken: token?.accessToken || '' });
-    const { data: myProfile } = useGetMyuserQuery(token?.accessToken || '');
+    const { data: userPosts, isLoading: PostsLoading, error: PostsError } = useGetPostUserIdQuery({ id: Number(id), accessToken });
+    const { data: myProfile } = useGetMyuserQuery(accessToken);
     const [followUser] = useFollowMutation();
     const [unfollowUser] = useUnfollowMutation();
 
@@ -59,9 +65,9 @@ const Profile = () => {
 
     const handleFollowProfile = (profileId: number) => {
         if (isProfileFollowed(profileId)) {
-            unfollowProfile(profileId, token?.accessToken || '', dispatch, unfollowUser);
+            unfollowProfile(profileId, accessToken, dispatch, unfollowUser);
         } else {
-            followProfile(profileId, token?.accessToken || '', dispatch, followUser);
+            followProfile(profileId, accessToken, dispatch, followUser);
         }
     };
 
@@ -73,15 +79,23 @@ const Profile = () => {
         setIsFollowingList(false)
         dispatch(openModalFollow())
     }
+    const openEdit = () => {
+        dispatch(openModalEditProfile())
+    }
 
+    console.log(userPosts)
     return (
         <S.Profile>
             <div>
-                <S.ProfilePicture>
-                    <img src={profileImg} alt="" />
+                <S.ProfilePicture style={{
+                    backgroundSize: 'cover',
+                    backgroundImage: user?.background_image ? `url(${convertUrl(user.background_image)})` : 'none',
+                    backgroundColor: user?.background_image ? 'transparent' : 'rgb(207, 217, 222)'
+                }}>
+                    <img src={user?.profile_image ? convertUrl(user?.profile_image) : profileImg} alt="Foto de perfil" />
                     <S.HeaderButton>
                         {myProfile?.id === Number(id) ? (
-                            <button className="configureButton"></button>
+                            <button onClick={openEdit} className="configureButton"></button>
                         ) : (
                             <>
                                 {isProfileFollowed(user.id) ? (
@@ -100,7 +114,7 @@ const Profile = () => {
                 <S.ProfileData>
                     <div>
                         <h3>{user.username}</h3>
-                        <h4>@{user.username}</h4>
+                        <h4>{user.arroba}</h4>
                     </div>
                     <p>{user.bio}</p>
                     <p>Ingressou em: {formatDate(user.created_at)}</p>
@@ -109,17 +123,18 @@ const Profile = () => {
                         <span onClick={openFollowing}><span>{user.following.length}</span> seguindo </span>
                     </div>
                 </S.ProfileData>
-                <div>
+                <PostContainer>
                     {userPosts.length > 0 ? (
                         userPosts.map((post: (PostProps | RetweetProps)) => (
                             ('tweet_id' in post) ? (<Retweet key={post.id} props={post} />) : (<Tweet key={post.id} props={post} />)
                         ))
                     ) : (
-                        <div className="container margin-top">O usuário não possui postagens</div>
+                        <div className=" container margin-top">O usuário não possui postagens</div>
                     )}
-                </div>
+                </PostContainer>
             </div>
-            {isModalOpen && <FollowList followersUser={followersUser} followingsUser={followingsUser} type={isFollowingList} />}
+            {isModalFollowOpen && <FollowList followersUser={followersUser} followingsUser={followingsUser} type={isFollowingList} />}
+            {isModalEditOpen && <ProfileForm profile={myProfile} />}
         </S.Profile >
     );
 };

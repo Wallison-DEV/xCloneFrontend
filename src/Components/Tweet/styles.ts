@@ -2,15 +2,6 @@ import styled from "styled-components";
 import { ButtonStyle } from "../Button/styles";
 import { breakpoints } from "../../styles";
 
-export const PostContainer = styled.div`
-    width: 100%;
-    border: 1px solid #f0f0f0;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 16px;
-    font-size: 16px;
-`;
-
 export const UserInfo = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -30,6 +21,7 @@ export const UserInfo = styled.div`
     img {
         width: 24px;
         margin-right: 8px;
+        border-radius: 50%;
     }
 
     >div{
@@ -95,6 +87,15 @@ export const PostDetails = styled.div`
         margin-left: 4px;
         height: 14px;
     }
+`
+
+export const PostDiv = styled.div`
+    width: 100%;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 16px;
 
     .retweet-div {
         position: relative;
@@ -113,8 +114,8 @@ export const PostDetails = styled.div`
 
         .options-div{
             position: absolute;
-            bottom: 140%;
-            right: -60px;
+            bottom: 24px;
+            right: 0;
             background: #fff;
             border-radius: 12px;
             box-shadow: 2px 4px 4px 2px rgba(0, 0, 0, 0.2);
@@ -122,6 +123,8 @@ export const PostDetails = styled.div`
 
         ${ButtonStyle}{
             padding: 12px 0;
+            background: #fff;
+            z-index: 1;
             border: none;
             width: 148px;
         }
@@ -132,17 +135,31 @@ export const PostDetails = styled.div`
             border-radius: 12px 12px 0 0 ;
         }
     }
-`
 
-export const PostDiv = styled.div`
-    width: 100%;
-    border: 1px solid #f0f0f0;
-    padding: 8px;
+    header {
+        position: relative;
+        .retweet-div{
+            .options-div {
+                bottom: 36px; 
+                right: 12px;
+            }
+        }
+        .more-options-btn {
+            position: absolute; 
+            right: 12px;
+            bottom: 16px;
+            cursor: pointer;
+        }
+    }
 `
 
 export const ImageDiv = styled.div`
     display: flex;
     justify-content: center;
-    width: 95%;
-    margin: 0;
+    align-items: center;
+    width: 100%;
+    img, video {
+        width: 516px;
+        height: 290px;
+    }
 `

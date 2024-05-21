@@ -15,6 +15,7 @@ export const PostForm = styled.form`
     > img {
         width: 40px;
         height: 40px;
+        border-radius: 50%;
     }
     video {
         max-width: 100%;
@@ -37,6 +38,7 @@ export const PostForm = styled.form`
         align-items: center;
         border-top: 1px solid rgb(239, 243, 244);
         padding-top: 12px;
+        width: 100%;
 
         img {
             width: 16px;
