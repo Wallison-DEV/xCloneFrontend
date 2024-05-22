@@ -7,6 +7,7 @@ import { Modal } from "../../styles";
 import userIcon from "../../assets/img/profile_avatar.png"
 import { IoHomeOutline, IoPersonOutline, IoSearch } from "react-icons/io5";
 import { FaPenFancy } from "react-icons/fa6";
+import { RiSunFill, RiMoonFill } from 'react-icons/ri';
 
 import { useGetMyuserQuery } from "../../Services/api";
 import { clearFollowed, updateMyUser } from "../../Store/reducers/profile";
@@ -16,7 +17,12 @@ import PostForm from "../PostForm";
 import Button from '../Button'
 import { convertUrl } from "../../Utils";
 
-const NavAside = () => {
+type NavProps = {
+    togleTheme: () => void;
+    isDarkTheme: boolean;
+}
+
+const NavAside = ({ isDarkTheme, togleTheme }: NavProps) => {
     const accessToken = localStorage.getItem('accessToken') || ''
     const dispatch = useDispatch()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -31,7 +37,7 @@ const NavAside = () => {
         try {
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-                const responseLogout = await fetch('https://wallison.pythonanywhere.com/api/logout/', {
+                const responseLogout = await fetch('http://localhost:8000/api/logout/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -56,6 +62,10 @@ const NavAside = () => {
             <S.LeftAside>
                 <div>
                     <div>
+                        <S.ThemeToggleButton onClick={togleTheme}>
+                            <S.TemaIcone isDarkTheme={isDarkTheme}>{isDarkTheme ? <RiMoonFill /> : <RiSunFill />}</S.TemaIcone>
+                            <p>Trocar Tema</p>
+                        </S.ThemeToggleButton>
                         <S.ItemAside to='/home' className="nav-link">
                             <div>
                                 <IoHomeOutline />
