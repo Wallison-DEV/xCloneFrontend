@@ -156,6 +156,6 @@ export const convertUrl = (url: string) => {
     if (url.startsWith('http://localhost')) {
         return url;
     } else {
-        return `http://localhost:8000${url}`;
+        return `https://wallison.pythonanywhere.com${url}`;
     }
 }
