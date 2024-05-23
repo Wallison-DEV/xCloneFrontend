@@ -37,7 +37,7 @@ const NavAside = ({ isDarkTheme, togleTheme }: NavProps) => {
         try {
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-                const responseLogout = await fetch('http://wallison.pythonanywhere.com/api/logout/', {
+                const responseLogout = await fetch('https://wallison.pythonanywhere.com/api/logout/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
