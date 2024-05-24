@@ -3,8 +3,10 @@ import { useDispatch } from 'react-redux';
 import { useCallback, useState } from 'react';
 
 // import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils';
-import { calculateTimeUntilExpiration } from '../../Utils';
+// import { calculateTimeUntilExpiration } from '../../Utils';
 import { useDoLoginMutation } from '../../Services/api';
+
+import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline } from 'react-google-login';
 
 import googleLogo from '../../assets/icons/google.png'
 import appleLogo from '../../assets/icons/apple-logo.png'
@@ -44,13 +46,40 @@ const Login = () => {
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('accessTokenExp', tokenExp.toString());
             localStorage.setItem('refreshToken', refreshToken);
-            const timeUntilExpiration = calculateTimeUntilExpiration(tokenExp);
+            // const timeUntilExpiration = calculateTimeUntilExpiration(tokenExp);
             // scheduleTokenRefresh(timeUntilExpiration, refreshToken, dispatch, 0);
         } catch (error: any) {
             console.error('Error logging in:', error.message);
             setErrorMessage('Falha ao fazer login. Por favor, verifique suas credenciais.');
         }
     }, [purchase, isError, error, dispatch]);
+
+    const handleGoogleSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
+        const token = response.code;
+        if (token) {
+            localStorage.setItem('accessToken', token);
+            fetch('https://wallison.pythonanywhere.com/auth/google/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token }),
+            }).then(res => {
+                if (res.ok) {
+                    dispatch(trueValidate())
+                    console.log('Login com Google realizado com sucesso!');
+                }
+            }).catch(error => console.error('Erro ao logar com Google:', error));
+        }
+    };
+
+    const handleGoogleFailure = (error: any) => {
+        console.error('Google login failed:', error);
+    };
+
+    const openModalApple = () => {
+        alert('Login com Apple não está disponível no momento, por favor, tente outro método');
+    };
 
     const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault();
@@ -70,11 +99,19 @@ const Login = () => {
                     {isEmail ? (
                         <ListDiv>
                             <SecondTitle>Entrar no X</SecondTitle>
-                            <Button variant='light' className="margin-24">
-                                <img src={googleLogo} alt="" /> Inscrever-se no Google
-                            </Button>
-                            <Button variant='light'>
-                                <img src={appleLogo} alt="" /> Inscrever-se no Apple
+                            <GoogleLogin
+                                clientId="297868879617-fjhuhdhkuer3dkohs0cblra0q89emdpe.apps.googleusercontent.com"
+                                onSuccess={handleGoogleSuccess}
+                                onFailure={handleGoogleFailure}
+                                cookiePolicy={'single_host_origin'}
+                                render={renderProps => (
+                                    <Button variant='light' className="margin-24" onClick={renderProps.onClick}>
+                                        <img src={googleLogo} alt="" /> Entrar com Google
+                                    </Button>
+                                )}
+                            />
+                            <Button variant='light' onClick={openModalApple}>
+                                <img src={appleLogo} alt="" /> Registrar-se com Apple
                             </Button>
                             <Separador>ou</Separador>
                             <S.InputDiv>
