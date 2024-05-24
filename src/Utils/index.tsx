@@ -153,7 +153,7 @@ export const timePost = (createdAt: string) => {
 };
 
 export const convertUrl = (url: string) => {
-    if (url.startsWith('https://wallison.pythonanywhere')) {
+    if (url.startsWith('https://wallison')) {
         return url;
     } else {
         return `https://wallison.pythonanywhere.com${url}`;
