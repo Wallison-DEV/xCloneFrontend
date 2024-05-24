@@ -22,7 +22,7 @@ const Entrada = () => {
 
     const handleGoogleSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         const token = response.code;
-        fetch('https://wallison.pythonanywhere.com/auth/register/google', {
+        fetch('https://wallison.pythonanywhere.com/accounts/auth/register/google', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

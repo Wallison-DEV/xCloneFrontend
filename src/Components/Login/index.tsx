@@ -58,7 +58,7 @@ const Login = () => {
         const token = response.code;
         if (token) {
             localStorage.setItem('accessToken', token);
-            fetch('https://wallison.pythonanywhere.com/auth/google/', {
+            fetch('https://wallison.pythonanywhere.com/accounts/auth/google/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
