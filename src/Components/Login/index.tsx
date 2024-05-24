@@ -100,7 +100,7 @@ const Login = () => {
                         <ListDiv>
                             <SecondTitle>Entrar no X</SecondTitle>
                             <GoogleLogin
-                                clientId="297868879617-eiid8olcbqvp1mg1ldif7lt1jt94imkh.apps.googleusercontent.com"
+                                clientId="297868879617-fjhuhdhkuer3dkohs0cblra0q89emdpe.apps.googleusercontent.com"
                                 onSuccess={handleGoogleSuccess}
                                 onFailure={handleGoogleFailure}
                                 cookiePolicy={'single_host_origin'}
