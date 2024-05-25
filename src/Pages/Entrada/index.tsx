@@ -15,14 +15,14 @@ import Login from '../../Components/Login'
 import Cadastro from '../../Components/Cadastro'
 import { useTheme } from 'styled-components'
 
-const Entrada = () => {
+const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<void> }) => {
     const dispatch = useDispatch()
     const theme = useTheme()
     const { loginOpen, registerOpen } = useSelector((state: RootReducer) => state.entry);
 
     const handleGoogleSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         const token = response.code;
-        fetch('https://wallison.pythonanywhere.com/accounts/auth/register/google', {
+        fetch('http://localhost:8000/accounts/auth/register/google', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const Entrada = () => {
                     </div>
                 </S.EntryDiv>
             </div >
-            {loginOpen && <Login />}
+            {loginOpen && <Login checkAuthentication={checkAuthentication} />}
             {registerOpen && <Cadastro />}
         </div >
     );

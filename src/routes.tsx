@@ -1,20 +1,20 @@
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 
-import Entrada from './Pages/Entrada';
-import Home from './Pages/Home';
+import { checkingAuthentication, authenticationSuccess, authenticationFailed } from './Store/reducers/entry';
 import { verifyAuthenticated } from './Utils';
-import Profile from './Pages/Profile';
 
 import ProfileAside from './Components/ProfilesAside';
 import NavAside from './Components/NavAside';
+
+import Profile from './Pages/Profile';
+import Entrada from './Pages/Entrada';
 import Search from './Pages/Search';
+import Post from './Pages/Post';
+import Home from './Pages/Home';
 
 import { Container } from './styles';
-import Post from './Pages/Post';
-import { RootReducer } from './Store';
-import { falseValidate, trueValidate } from './Store/reducers/entry';
 
 type RotasProps = {
     togleTheme: () => void;
@@ -22,46 +22,38 @@ type RotasProps = {
 }
 
 const Rotas = ({ togleTheme, isDarkTheme }: RotasProps) => {
-    const isAuthenticated = useSelector((state: RootReducer) => state.entry.isValidate);
     const dispatch = useDispatch();
+    const { isAuthenticated, checkAuth } = useSelector((state: any) => state.entry);
 
     const checkAuthentication = async () => {
+        dispatch(checkingAuthentication());
         const accessToken = localStorage.getItem('accessToken');
         const accessTokenExp = localStorage.getItem('accessTokenExp');
         try {
             const isSuccess = await verifyAuthenticated(accessToken, accessTokenExp);
             if (isSuccess) {
-                console.log('Autenticação bem-sucedida');
-                dispatch(trueValidate());
+                dispatch(authenticationSuccess());
             } else {
-                console.log('Falha na autenticação');
-                dispatch(falseValidate());
+                dispatch(authenticationFailed());
             }
         } catch (error) {
             console.error('Erro ao verificar autenticação:', error);
-            dispatch(falseValidate());
+            dispatch(authenticationFailed());
         }
     };
 
     useEffect(() => {
         checkAuthentication();
-
-        const handleStorageChange = () => {
-            window.addEventListener('storage', checkAuthentication);
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        }
+    }, [checkAuth]);
+    useEffect(() => {
+        checkAuthentication();
     }, []);
 
     return (
         <>
             {isAuthenticated && (
                 <Container>
-                    <NavAside isDarkTheme={isDarkTheme} togleTheme={togleTheme} />
+                    <NavAside checkAuthentication={checkAuthentication} isDarkTheme={isDarkTheme} togleTheme={togleTheme} />
                     < >
                         <Routes>
                             <Route path="/home" element={<Home />} />
@@ -76,7 +68,7 @@ const Rotas = ({ togleTheme, isDarkTheme }: RotasProps) => {
             )}
             {!isAuthenticated && (
                 <Routes>
-                    <Route path="/login" element={<Entrada />} />
+                    <Route path="/login" element={<Entrada checkAuthentication={checkAuthentication} />} />
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>
             )}
