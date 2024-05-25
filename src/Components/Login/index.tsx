@@ -35,7 +35,6 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
         try {
             const requestBody: LoginRequestBody = { username_or_email: usernameOrEmail, password: password };
             const response = await purchase(requestBody).unwrap();
-            console.log('resposta do login', response)
             if (response.status == 400) {
                 console.error('Error logging in:', response.error);
                 setErrorMessage('Falha ao fazer login. Por favor, verifique suas credenciais.');
@@ -58,7 +57,7 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
         const token = response.code;
         if (token) {
             localStorage.setItem('accessToken', token);
-            fetch('http://localhost:8000/accounts/auth/google/', {
+            fetch('https://wallison.pythonanywhere.com/accounts/auth/google/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,12 +130,10 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
                                 <S.InputDiv>
                                     <span>E-mail ou nome de usuário</span>
                                     <input type="text" value={usernameOrEmail} disabled />
-                                    {usernameOrEmail}
                                 </S.InputDiv>
                                 <S.InputDiv>
                                     <span>Senha</span>
                                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                                    {password}
                                 </S.InputDiv>
                                 {errorMessage && <S.Error>{errorMessage}</S.Error>}
                             </div>
