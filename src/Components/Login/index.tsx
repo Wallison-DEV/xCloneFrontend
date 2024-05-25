@@ -2,8 +2,7 @@ import { useTheme } from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useCallback, useState } from 'react';
 
-// import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils';
-// import { calculateTimeUntilExpiration } from '../../Utils';
+import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils';
 import { useDoLoginMutation } from '../../Services/api';
 
 import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline } from 'react-google-login';
@@ -23,42 +22,43 @@ import { Separador, ListDiv } from '../../Pages/Entrada/styles';
 import { Modal, SecondTitle } from '../../styles';
 import { closeModal, openRegister, trueValidate } from '../../Store/reducers/entry';
 
-const Login = () => {
+const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<void> }) => {
     const theme = useTheme()
     const [usernameOrEmail, setUsernameOrEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEmail, setIsEmail] = useState(true);
-    const [purchase, { isError, error }] = useDoLoginMutation();
+    const [purchase] = useDoLoginMutation();
     const dispatch = useDispatch();
 
     const handleLogin = useCallback(async () => {
         try {
             const requestBody: LoginRequestBody = { username_or_email: usernameOrEmail, password: password };
             const response = await purchase(requestBody).unwrap();
-            if (isError) {
-                console.error('Error logging in:', error);
+            console.log('resposta do login', response)
+            if (response.status == 400) {
+                console.error('Error logging in:', response.error);
                 setErrorMessage('Falha ao fazer login. Por favor, verifique suas credenciais.');
                 return;
             }
             const { access: accessToken, exp: tokenExp, refresh: refreshToken } = response;
-            dispatch(trueValidate())
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('accessTokenExp', tokenExp.toString());
             localStorage.setItem('refreshToken', refreshToken);
-            // const timeUntilExpiration = calculateTimeUntilExpiration(tokenExp);
-            // scheduleTokenRefresh(timeUntilExpiration, refreshToken, dispatch, 0);
+            const timeUntilExpiration = calculateTimeUntilExpiration(tokenExp);
+            scheduleTokenRefresh(timeUntilExpiration, refreshToken, dispatch, 0);
+            await checkAuthentication()
         } catch (error: any) {
-            console.error('Error logging in:', error.message);
+            console.error('Error logging in:', error);
             setErrorMessage('Falha ao fazer login. Por favor, verifique suas credenciais.');
         }
-    }, [purchase, isError, error, dispatch]);
+    }, [purchase, dispatch, usernameOrEmail, password]);
 
     const handleGoogleSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         const token = response.code;
         if (token) {
             localStorage.setItem('accessToken', token);
-            fetch('https://wallison.pythonanywhere.com/accounts/auth/google/', {
+            fetch('http://localhost:8000/accounts/auth/google/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,10 +131,12 @@ const Login = () => {
                                 <S.InputDiv>
                                     <span>E-mail ou nome de usuário</span>
                                     <input type="text" value={usernameOrEmail} disabled />
+                                    {usernameOrEmail}
                                 </S.InputDiv>
                                 <S.InputDiv>
                                     <span>Senha</span>
                                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    {password}
                                 </S.InputDiv>
                                 {errorMessage && <S.Error>{errorMessage}</S.Error>}
                             </div>
