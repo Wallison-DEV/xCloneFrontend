@@ -65,7 +65,7 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
                             <G.SecondTitle>Inscreva-se Hoje</G.SecondTitle>
                             <S.InputsDiv>
                                 <GoogleLogin
-                                    clientId="297868879617-fjhuhdhkuer3dkohs0cblra0q89emdpe.apps.googleusercontent.com"
+                                    clientId="297868879617-6igc8ikt47juhj3p5kkg6agn5t7175bs.apps.googleusercontent.com"
                                     onSuccess={handleGoogleSuccess}
                                     onFailure={handleGoogleFailure}
                                     cookiePolicy={'single_host_origin'}
