@@ -1,13 +1,12 @@
 import { useTheme } from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useCallback, useState } from 'react';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 
 import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils';
 import { useDoLoginMutation } from '../../Services/api';
 
-import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline } from 'react-google-login';
-
-import googleLogo from '../../assets/icons/google.png'
+// import googleLogo from '../../assets/icons/google.png'
 import appleLogo from '../../assets/icons/apple-logo.png'
 
 interface LoginRequestBody {
@@ -53,27 +52,21 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
         }
     }, [purchase, dispatch, usernameOrEmail, password]);
 
-    const handleGoogleSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-        const token = response.code;
-        if (token) {
-            localStorage.setItem('accessToken', token);
-            fetch('https://wallison.pythonanywhere.com/accounts/auth/google/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token }),
-            }).then(res => {
-                if (res.ok) {
-                    console.log('Login com Google realizado com sucesso!');
-                    checkAuthentication()
-                }
-            }).catch(error => console.error('Erro ao logar com Google:', error));
+    const handleGoogleSuccess = useCallback(async (credentialResponse: CredentialResponse) => {
+        const idToken = credentialResponse.credential;
+        try {
+            if (idToken && checkAuthentication) {
+                await checkAuthentication();
+            }
+        } catch (error) {
+            console.error('Erro ao logar com Google:', error);
+            setErrorMessage('Falha ao fazer login com Google. Tente novamente.');
         }
-    };
+    }, [checkAuthentication]);
 
-    const handleGoogleFailure = (error: any) => {
-        console.error('Google login failed:', error);
+    const handleGoogleFailure = () => {
+        console.error('Google login failed');
+        setErrorMessage('Falha na autenticação com Google.');
     };
 
     const openModalApple = () => {
@@ -98,17 +91,12 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
                     {isEmail ? (
                         <ListDiv>
                             <SecondTitle>Entrar no X</SecondTitle>
-                            <GoogleLogin
-                                clientId="297868879617-fjhuhdhkuer3dkohs0cblra0q89emdpe.apps.googleusercontent.com"
-                                onSuccess={handleGoogleSuccess}
-                                onFailure={handleGoogleFailure}
-                                cookiePolicy={'single_host_origin'}
-                                render={renderProps => (
-                                    <Button variant='light' className="margin-24" onClick={renderProps.onClick}>
-                                        <img src={googleLogo} alt="" /> Entrar com Google
-                                    </Button>
-                                )}
-                            />
+                            {/* <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure}>
+                                <Button variant='light' className="margin-24" >
+                                    <img src={googleLogo} alt="" /> Entrar com Google
+                                </Button>
+                            </GoogleLogin> */}
+                            <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
                             <Button variant='light' onClick={openModalApple}>
                                 <img src={appleLogo} alt="" /> Registrar-se com Apple
                             </Button>
