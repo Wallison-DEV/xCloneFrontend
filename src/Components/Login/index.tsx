@@ -55,11 +55,26 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
     const handleGoogleSuccess = useCallback(async (credentialResponse: CredentialResponse) => {
         const idToken = credentialResponse.credential;
         try {
-            if (idToken && checkAuthentication) {
-                await checkAuthentication();
+            const response = await fetch('https://wallison.pythonanywhere.com/accounts/auth/login/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: idToken }),
+            });
+            if (!response.ok) {
+                console.error('Error logging in with Google:', response.statusText);
+                setErrorMessage('Falha ao fazer login com Google. Tente novamente.');
+                return;
             }
+            const responseData = await response.json();
+            const { access: accessToken, exp: tokenExp, refresh: refreshToken } = responseData;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('accessTokenExp', tokenExp.toString());
+            localStorage.setItem('refreshToken', refreshToken);
+            await checkAuthentication();
         } catch (error) {
-            console.error('Erro ao logar com Google:', error);
+            console.error('Error logging in with Google:', error);
             setErrorMessage('Falha ao fazer login com Google. Tente novamente.');
         }
     }, [checkAuthentication]);
