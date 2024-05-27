@@ -20,7 +20,7 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
     const { loginOpen, registerOpen } = useSelector((state: RootReducer) => state.entry);
 
     const handleGoogleSuccess = (credentialResponse: any) => {
-        fetch('http://localhost:8000/accounts/auth/register/google', {
+        fetch('https://wallison.pythonanywhere.com/accounts/auth/register/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: credentialResponse.credential }),
