@@ -66,7 +66,7 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
     // const handleGoogleSuccess = useCallback(async (credentialResponse: CredentialResponse) => {
     //     const idToken = credentialResponse.credential;
     //     try {
-    //         const response = await fetch('http://localhost:8000/accounts/auth/login/google', {
+    //         const response = await fetch('https://wallison.pythonanywhere.com/accounts/auth/login/google', {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json',
