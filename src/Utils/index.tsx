@@ -25,7 +25,7 @@ export const scheduleTokenRefresh = async (timeUntilExpiration: number, refreshT
         const refresh = refreshToken;
         if (refresh !== undefined) {
             try {
-                const response = await fetch('https://wallison.pythonanywhere.com/api/token/refresh/', {
+                const response = await fetch('http://localhost:8000/api/token/refresh/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refresh: refresh }),
@@ -69,7 +69,7 @@ const validateToken = async (accessToken: any) => {
         return false;
     }
     try {
-        const response = await fetch('https://wallison.pythonanywhere.com/api/token/validate/', {
+        const response = await fetch('http://localhost:8000/api/token/validate/', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -77,7 +77,6 @@ const validateToken = async (accessToken: any) => {
             },
         });
         if (response.status == 200) {
-            console.log('Token is valid:', response);
             return true;
         } else {
             console.error('Failed to validate token');
@@ -156,9 +155,9 @@ export const timePost = (createdAt: string) => {
 };
 
 export const convertUrl = (url: string) => {
-    if (url.startsWith('https://wallison.pythonanywhere.com/')) {
+    if (url.startsWith('http://localhost:8000/')) {
         return url;
     } else {
-        return `https://wallison.pythonanywhere.com${url}`;
+        return `http://localhost:8000${url}`;
     }
 }

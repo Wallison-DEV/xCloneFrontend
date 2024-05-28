@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import * as S from '../Postdetails/styles'
 import { StyledHeader } from "../PostList/styles"
@@ -13,6 +13,7 @@ import pictureIcon from '../../assets/icons/pictureIcon.png'
 import Button from "../Button";
 import MinimizedTweet from "../MinimizedTweet";
 import { convertUrl } from "../../Utils";
+import ConfirmModal from "../ConfirmModal";
 
 interface PostRetweetProps {
     post: PostProps;
@@ -22,9 +23,10 @@ interface PostRetweetProps {
 const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
     const accessToken = localStorage.getItem('accessToken') || ''
     const { data: myProfile } = useGetMyuserQuery(accessToken)
-    const [doRepost, { isError, error, isSuccess }] = useDoRepostMutation();
+    const [doRepost] = useDoRepostMutation();
     const [textRepostValue, setTextRepostValue] = useState('')
     const [sourceRepostValue, setSourceRepostValue] = useState<File | null>(null)
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
     const handleSourceRepostChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -50,23 +52,15 @@ const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
             const response = await doRepost({
                 content, tweet, media, accessToken,
             });
-            console.log('response: ', response)
-
+            if ('data' in response && response.data === 201) {
+                setSourceRepostValue(null);
+                setTextRepostValue('');
+                setIsSuccessModalOpen(true);
+            }
         } catch (error) {
             console.error('Error making repost:', error);
         }
     };
-    useEffect(() => {
-        if (isError) {
-            console.log("repost error", error);
-        }
-        if (isSuccess) {
-            console.log(post.id)
-            console.log("Repostado com sucesso!");
-            setSourceRepostValue(null);
-            setTextRepostValue("");
-        }
-    }, [isSuccess, isError, error]);
     return (
         <LoginDiv>
             <S.StyledPostDetails>
@@ -105,6 +99,12 @@ const PostRetweet: React.FC<PostRetweetProps> = ({ post, onClose }) => {
                     </div>
                 </PostForm>
             </S.StyledPostDetails>
+            {isSuccessModalOpen && (
+                <ConfirmModal
+                    text='Retweet criado com sucessso!.'
+                    onClose={() => { setIsSuccessModalOpen(false); close(); }}
+                />
+            )}
         </LoginDiv>
     )
 }
