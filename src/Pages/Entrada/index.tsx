@@ -1,7 +1,7 @@
 import { useTheme } from 'styled-components'
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
-// import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 
 import googleLogo from '../../assets/icons/google.png'
 import appleLogo from '../../assets/icons/apple-logo.png'
@@ -69,7 +69,14 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
                                 <Button variant='light' className="margin-24" onClick={openModalGoogle}>
                                     <img src={googleLogo} alt="" /> Registrar-se com Google
                                 </Button>
-                                {/* <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} text='signup_with' /> */}
+                                <GoogleLogin
+                                    onSuccess={credentialResponse => {
+                                        console.log(credentialResponse);
+                                    }}
+                                    onError={() => {
+                                        console.log('Login Failed');
+                                    }}
+                                />;
                                 <Button variant='light' onClick={openModalApple}>
                                     <img src={appleLogo} alt="" /> Registrar-se com Apple
                                 </Button>
