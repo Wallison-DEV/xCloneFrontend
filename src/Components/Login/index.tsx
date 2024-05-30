@@ -1,12 +1,13 @@
 import { useTheme } from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useCallback, useState } from 'react';
-import { CredentialResponse } from '@react-oauth/google';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils';
 import { useDoLoginMutation } from '../../Services/api';
 
 import appleLogo from '../../assets/icons/apple-logo.png'
+import googleLogo from '../../assets/icons/google.png'
 
 interface LoginRequestBody {
     username_or_email: string;
@@ -16,7 +17,7 @@ interface LoginRequestBody {
 import * as S from './styles';
 import Button from '../Button';
 
-import { Separador, ListDiv, StyledRegButton } from '../../Pages/Entrada/styles';
+import { Separador, ListDiv } from '../../Pages/Entrada/styles';
 import { Modal, SecondTitle } from '../../styles';
 import { closeModal, openRegister } from '../../Store/reducers/entry';
 import ConfirmModal from '../ConfirmModal';
@@ -69,6 +70,21 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
         }
     };
 
+    const CustomButton = () => {
+        const Login = GoogleLogin({
+            onSuccess: handleGoogleLogin,
+            onError: () => {
+                console.log('Login Failed');
+            },
+        })
+
+        return (
+            <Button variant='light' className='margin-24' onClick={() => Login}>
+                <img src={googleLogo} alt="" /> Entrar com Google
+            </Button>
+        )
+    }
+
     const handleLogin = useCallback(async () => {
         try {
             const requestBody: LoginRequestBody = { username_or_email: usernameOrEmail, password: password };
@@ -109,15 +125,9 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
                     {isEmail ? (
                         <ListDiv>
                             <SecondTitle>Entrar no X</SecondTitle>
-                            <StyledRegButton
-                                text="signup_with"
-                                onSuccess={handleGoogleLogin}
-                                onError={() => {
-                                    console.log('Login Failed');
-                                }}
-                            />
+                            <CustomButton />
                             <Button variant='light' onClick={openModalApple}>
-                                <img src={appleLogo} alt="" /> Registrar-se com Apple
+                                <img src={appleLogo} alt="" /> Entrar com Apple
                             </Button>
                             <Separador>ou</Separador>
                             <S.InputDiv>

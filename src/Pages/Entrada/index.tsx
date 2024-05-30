@@ -1,8 +1,10 @@
 import { useTheme } from 'styled-components'
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+
 import appleLogo from '../../assets/icons/apple-logo.png'
-import { CredentialResponse } from '@react-oauth/google';
+import googleLogo from '../../assets/icons/google.png'
 
 import * as S from './styles'
 import * as G from '../../styles'
@@ -67,6 +69,21 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
         dispatch(openRegister());
     };
 
+    const CustomButton = () => {
+        const Login = GoogleLogin({
+            onSuccess: handleGoogleSignup,
+            onError: () => {
+                console.log('Login Failed');
+            },
+        })
+
+        return (
+            <Button variant='light' className='margin-24' onClick={() => Login}>
+                <img src={googleLogo} alt="" /> Registrar-se com Google
+            </Button>
+        )
+    }
+
     return (
         <div>
             <div className='container'>
@@ -77,13 +94,7 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
                             <G.PrimaryTitle className='margin-24'>Acontecendo agora</G.PrimaryTitle>
                             <G.SecondTitle>Inscreva-se Hoje</G.SecondTitle>
                             <S.InputsDiv>
-                                <S.StyledRegButton
-                                    text="signup_with"
-                                    onSuccess={handleGoogleSignup}
-                                    onError={() => {
-                                        console.log('Login Failed');
-                                    }}
-                                />
+                                <CustomButton />
                                 <Button variant='light' onClick={openModalApple}>
                                     <img src={appleLogo} alt="" /> Registrar-se com Apple
                                 </Button>
