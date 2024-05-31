@@ -35,7 +35,7 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
 
     const handleGoogleSignup = async (credentialResponse: CredentialResponse) => {
         try {
-            const response = await fetch('http://localhost:8000/accounts/auth/register/google', {
+            const response = await fetch('https://wallison.pythonanywhere.com/accounts/auth/register/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
