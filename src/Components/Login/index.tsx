@@ -7,7 +7,6 @@ import { calculateTimeUntilExpiration, scheduleTokenRefresh } from '../../Utils'
 import { useDoLoginMutation } from '../../Services/api';
 
 import appleLogo from '../../assets/icons/apple-logo.png'
-import googleLogo from '../../assets/icons/google.png'
 
 interface LoginRequestBody {
     username_or_email: string;
@@ -38,11 +37,12 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
     };
 
     const handleGoogleLogin = async (credentialResponse: CredentialResponse) => {
+        console.log(credentialResponse)
         try {
-            const response = await fetch('https://wallison.pythonanywhere.com/accounts/auth/google/login', {
+            const response = await fetch('http://localhost:8000/accounts/auth/google/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     credential: credentialResponse.credential,
@@ -69,21 +69,6 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
             setErrorMessage('Falha ao fazer login com o Google. Por favor, tente novamente mais tarde.');
         }
     };
-
-    const CustomButton = () => {
-        const Login = GoogleLogin({
-            onSuccess: handleGoogleLogin,
-            onError: () => {
-                console.log('Login Failed');
-            },
-        })
-
-        return (
-            <Button variant='light' className='margin-24' onClick={() => Login}>
-                <img src={googleLogo} alt="" /> Entrar com Google
-            </Button>
-        )
-    }
 
     const handleLogin = useCallback(async () => {
         try {
@@ -125,9 +110,20 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
                     {isEmail ? (
                         <ListDiv>
                             <SecondTitle>Entrar no X</SecondTitle>
-                            <CustomButton />
+                            <div className='margin-24' >
+                                <GoogleLogin
+                                    logo_alignment='center'
+                                    text='signin_with'
+                                    width='298px'
+                                    shape='pill'
+                                    onSuccess={handleGoogleLogin}
+                                    onError={() => {
+                                        console.log('Login Failed');
+                                    }}
+                                />
+                            </div>
                             <Button variant='light' onClick={openModalApple}>
-                                <img src={appleLogo} alt="" /> Entrar com Apple
+                                <img src={appleLogo} alt="" /> Fazer login com Apple
                             </Button>
                             <Separador>ou</Separador>
                             <S.InputDiv>
@@ -160,14 +156,16 @@ const Login = ({ checkAuthentication }: { checkAuthentication: () => Promise<voi
                     )}
                 </S.StyledForm>
             </S.LoginDiv>
-            {isAppleOpen && (
-                <ConfirmModal
-                    text='Desculpe, o login com Apple não está disponível no momento. Por favor, escolha outra forma de acesso.'
-                    onClose={() => setIsAppleOpen(false)}
-                />
-            )}
+            {
+                isAppleOpen && (
+                    <ConfirmModal
+                        text='Desculpe, o login com Apple não está disponível no momento. Por favor, escolha outra forma de acesso.'
+                        onClose={() => setIsAppleOpen(false)}
+                    />
+                )
+            }
             <div className='overlay' onClick={close} />
-        </Modal>
+        </Modal >
     )
 }
 

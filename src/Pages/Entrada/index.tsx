@@ -1,10 +1,8 @@
 import { useTheme } from 'styled-components'
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-
 import appleLogo from '../../assets/icons/apple-logo.png'
-import googleLogo from '../../assets/icons/google.png'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 import * as S from './styles'
 import * as G from '../../styles'
@@ -37,7 +35,7 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
 
     const handleGoogleSignup = async (credentialResponse: CredentialResponse) => {
         try {
-            const response = await fetch('https://wallison.pythonanywhere.com/accounts/auth/register/google', {
+            const response = await fetch('http://localhost:8000/accounts/auth/register/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -69,21 +67,6 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
         dispatch(openRegister());
     };
 
-    const CustomButton = () => {
-        const Login = GoogleLogin({
-            onSuccess: handleGoogleSignup,
-            onError: () => {
-                console.log('Login Failed');
-            },
-        })
-
-        return (
-            <Button variant='light' className='margin-24' onClick={() => Login}>
-                <img src={googleLogo} alt="" /> Registrar-se com Google
-            </Button>
-        )
-    }
-
     return (
         <div>
             <div className='container'>
@@ -94,7 +77,18 @@ const Entrada = ({ checkAuthentication }: { checkAuthentication: () => Promise<v
                             <G.PrimaryTitle className='margin-24'>Acontecendo agora</G.PrimaryTitle>
                             <G.SecondTitle>Inscreva-se Hoje</G.SecondTitle>
                             <S.InputsDiv>
-                                <CustomButton />
+                                <div className='margin-24'>
+                                    <GoogleLogin
+                                        logo_alignment='center'
+                                        text='signup_with'
+                                        width='298px'
+                                        shape='pill'
+                                        onSuccess={handleGoogleSignup}
+                                        onError={() => {
+                                            console.log('Login Failed');
+                                        }}
+                                    />
+                                </div>
                                 <Button variant='light' onClick={openModalApple}>
                                     <img src={appleLogo} alt="" /> Registrar-se com Apple
                                 </Button>
